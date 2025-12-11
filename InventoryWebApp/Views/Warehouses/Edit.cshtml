@@ -1,0 +1,40 @@
+@model InventoryWebApp.Models.Warehouse
+
+@{
+    ViewData["Title"] = "تعديل بيانات المخزن";
+}
+
+<div class="container mt-4" dir="rtl">
+
+    <h2 class="text-center mb-4">✏️ تعديل بيانات المخزن</h2>
+
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+
+            <form method="post" class="card p-4 shadow-sm bg-white">
+
+                <input type="hidden" asp-for="WarehouseID" />
+
+                <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+                <div class="mb-3">
+                    <label class="form-label">اسم المخزن</label>
+                    <input asp-for="WarehouseName" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">الفرع</label>
+                    <input asp-for="BranchName" class="form-control" />
+                </div>
+
+                <div class="d-flex justify-content-between mt-3">
+                    <a href="/Warehouses" class="btn btn-secondary">⬅ رجوع</a>
+                    <button class="btn btn-primary">💾 حفظ التعديلات</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>

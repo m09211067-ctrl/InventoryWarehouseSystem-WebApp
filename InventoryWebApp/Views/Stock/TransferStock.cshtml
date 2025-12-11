@@ -1,0 +1,64 @@
+@{
+    ViewData["Title"] = "تحويل مخزون";
+}
+
+<div class="container mt-4" dir="rtl">
+
+    <h2 class="text-center mb-4 text-info">🔄 تحويل كمية بين مخازن</h2>
+
+    @if (TempData["error"] != null)
+    {
+        <div class="alert alert-danger text-center">@TempData["error"]</div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+
+            <form method="post" class="card p-4 shadow-sm">
+
+                <div class="mb-3">
+                    <label class="form-label">اختر المنتج</label>
+                    <select name="productId" class="form-select">
+                        @foreach (var p in ViewBag.Products)
+                        {
+                            <option value="@p.ProductID">@p.ProductName</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">من المخزن</label>
+                    <select name="fromWarehouseId" class="form-select">
+                        @foreach (var w in ViewBag.Warehouses)
+                        {
+                            <option value="@w.WarehouseID">@w.WarehouseName</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">إلى المخزن</label>
+                    <select name="toWarehouseId" class="form-select">
+                        @foreach (var w in ViewBag.Warehouses)
+                        {
+                            <option value="@w.WarehouseID">@w.WarehouseName</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">الكمية</label>
+                    <input type="number" name="quantity" class="form-control" required min="1" />
+                </div>
+
+                <div class="d-flex justify-content-between mt-3">
+                    <a href="/Stock" class="btn btn-secondary">⬅ رجوع</a>
+                    <button class="btn btn-info">تحويل</button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>

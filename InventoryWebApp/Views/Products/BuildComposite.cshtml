@@ -1,0 +1,43 @@
+@model InventoryWebApp.Models.Product
+
+@{
+    ViewData["Title"] = "منتج مركب (Builder Pattern)";
+}
+
+<div class="container mt-4" dir="rtl">
+    <h2 class="mb-4 text-center">🧩 منتج مركب تم بناؤه باستخدام Builder Pattern</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <h4 class="mb-3">@Model.ProductName</h4>
+
+            <p><strong>الباركود:</strong> @Model.Barcode</p>
+            <p><strong>السعر:</strong> @Model.Price</p>
+            <p><strong>الكمية:</strong> @Model.Quantity</p>
+
+            @if (Model.Components != null && Model.Components.Any())
+            {
+                <h5 class="mt-3">المكوّنات:</h5>
+                <ul class="list-group mb-3">
+                    @foreach (var c in Model.Components)
+                    {
+                        <li class="list-group-item">@c</li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="text-muted">لا توجد مكوّنات معرفّة لهذا المنتج.</p>
+            }
+
+            <div class="alert alert-info mt-3">
+                ✅ هذا المنتج تم إنشاؤه برمجيًا عن طريق
+                <strong>ProductDirector</strong> و
+                <strong>CompositeProductBuilder</strong> (نمط <em>Builder</em>).
+            </div>
+
+            <a href="/Products" class="btn btn-secondary mt-2">⬅ رجوع لقائمة المنتجات</a>
+        </div>
+    </div>
+</div>

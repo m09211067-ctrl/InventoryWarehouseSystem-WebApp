@@ -1,0 +1,56 @@
+@model IEnumerable<InventoryWebApp.Models.StockMovement>
+
+@{
+    ViewData["Title"] = "سجل الحركات";
+}
+
+<div class="container mt-4" dir="rtl">
+
+    <h2 class="text-center mb-4">📜 سجل حركات المخزون</h2>
+
+    <a href="/Stock" class="btn btn-secondary mb-3">⬅ رجوع لصفحة المخزون</a>
+
+    <table class="table table-bordered table-striped text-center align-middle shadow-sm bg-white">
+        <thead class="table-dark">
+            <tr>
+                <th>رقم الحركة</th>
+                <th>رقم المنتج</th>
+                <th>رقم المخزن</th>
+                <th>نوع الحركة</th>
+                <th>الكمية</th>
+                <th>التاريخ</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var m in Model)
+                {
+                    string badgeClass = m.MovementType switch
+                    {
+                        "IN" => "badge bg-success",
+                        "OUT" => "badge bg-danger",
+                        "TRANSFER" => "badge bg-info",
+                        _ => "badge bg-secondary"
+                    };
+
+                    <tr>
+                        <td>@m.MovementID</td>
+                        <td>@m.ProductID</td>
+                        <td>@m.WarehouseID</td>
+                        <td><span class="@badgeClass">@m.MovementType</span></td>
+                        <td>@m.Quantity</td>
+                        <td>@m.Date.ToString("yyyy/MM/dd HH:mm")</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="text-muted">لا توجد حركات مسجلة.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>

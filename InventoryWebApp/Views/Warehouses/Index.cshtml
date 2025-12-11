@@ -1,0 +1,56 @@
+@model IEnumerable<InventoryWebApp.Models.Warehouse>
+
+@{
+    ViewData["Title"] = "قائمة المخازن";
+}
+
+<div class="container mt-4" dir="rtl">
+
+    <h2 class="text-center mb-4">🏬 قائمة المخازن</h2>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success text-center">@TempData["Message"]</div>
+    }
+
+    <div class="d-flex justify-content-between mb-3">
+        <a href="/Warehouses/Create" class="btn btn-success">➕ إضافة مخزن جديد</a>
+    </div>
+
+    <table class="table table-bordered table-striped text-center align-middle shadow-sm bg-white">
+        <thead class="table-dark">
+            <tr>
+                <th>رقم المخزن</th>
+                <th>اسم المخزن</th>
+                <th>الفرع</th>
+                <th style="width: 200px;">العمليات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var w in Model)
+                {
+                    <tr>
+                        <td>@w.WarehouseID</td>
+                        <td>@w.WarehouseName</td>
+                        <td>@w.BranchName</td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="/Warehouses/Edit/@w.WarehouseID" class="btn btn-warning btn-sm">تعديل</a>
+                                <a href="/Warehouses/Delete/@w.WarehouseID" class="btn btn-danger btn-sm">حذف</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" class="text-muted">لا توجد مخازن مسجلة.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>

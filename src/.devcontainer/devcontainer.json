@@ -1,0 +1,25 @@
+{
+    "name": "Inventory System DevContainer",
+
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
+
+    "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.formatOnSave": true
+    },
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-dotnettools.csharp"
+            ]
+        }
+    },
+
+    "postCreateCommand": "dotnet restore",
+
+    "remoteUser": "root"
+}

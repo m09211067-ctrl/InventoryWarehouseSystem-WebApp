@@ -1,0 +1,42 @@
+@{
+    ViewData["Title"] = "لوحة المخزون";
+}
+
+<div class="container mt-4" dir="rtl">
+
+    <h2 class="text-center mb-4">📦 لوحة إدارة المخزون</h2>
+
+    <!-- رسالة نجاح -->
+    @if (TempData["msg"] != null)
+    {
+        <div class="alert alert-success text-center">@TempData["msg"]</div>
+    }
+
+    @if (TempData["error"] != null)
+    {
+        <div class="alert alert-danger text-center">@TempData["error"]</div>
+    }
+
+    <!-- بطاقات معلومات -->
+    <div class="row text-center mb-4">
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5>إجمالي المخزون</h5>
+                    <h3 class="text-success fw-bold">@ViewBag.TotalStock</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- روابط العمليات -->
+    <div class="mb-4 text-center">
+        <a href="/Stock/Add" class="btn btn-success mx-2">➕ إضافة مخزون</a>
+        <a href="/Stock/Remove" class="btn btn-warning mx-2">➖ خصم مخزون</a>
+        <a href="/Stock/Transfer" class="btn btn-info mx-2">🔄 تحويل مخزون</a>
+        <a href="/Stock/Movements" class="btn btn-secondary mx-2">📜 سجل الحركات</a>
+    </div>
+
+</div>

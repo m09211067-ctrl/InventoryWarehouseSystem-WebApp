@@ -1,0 +1,42 @@
+@model InventoryWebApp.Models.Warehouse
+
+@{
+    ViewData["Title"] = "حذف مخزن";
+}
+
+<div class="container mt-4" dir="rtl">
+
+    <h2 class="text-center mb-4 text-danger">⚠️ حذف المخزن</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <p class="mb-3">هل أنت متأكد أنك تريد حذف المخزن التالي؟</p>
+
+            <table class="table table-bordered">
+                <tr>
+                    <th>رقم المخزن</th>
+                    <td>@Model.WarehouseID</td>
+                </tr>
+                <tr>
+                    <th>اسم المخزن</th>
+                    <td>@Model.WarehouseName</td>
+                </tr>
+                <tr>
+                    <th>الفرع</th>
+                    <td>@Model.BranchName</td>
+                </tr>
+            </table>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="/Warehouses" class="btn btn-secondary">⬅ إلغاء</a>
+
+                <form method="post" action="/Warehouses/ConfirmDelete/@Model.WarehouseID">
+                    <button class="btn btn-danger">🗑 حذف نهائي</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+</div>
