@@ -84,7 +84,9 @@ namespace InventoryWebApp.Patterns
                 $"[STOCK INCREASE] Product={productId}, Qty={qty}, Warehouse={warehouseId}");
 
             var product = _uow.ProductRepository.GetById(productId);
-            _subject.Notify(product);
+
+            // 🔥 FIXED HERE
+            _subject.Notify(product.ProductName);
         }
 
         // --------------------------------------------------------
@@ -103,7 +105,9 @@ namespace InventoryWebApp.Patterns
                 $"[STOCK DECREASE] Product={productId}, Qty={qty}, Warehouse={warehouseId}");
 
             var product = _uow.ProductRepository.GetById(productId);
-            _subject.Notify(product);
+
+            // 🔥 FIXED HERE
+            _subject.Notify(product.ProductName);
 
             return true;
         }
@@ -124,7 +128,9 @@ namespace InventoryWebApp.Patterns
                 $"[TRANSFER] Product={productId}, Qty={qty}, From={fromWr} To={toWr}");
 
             var product = _uow.ProductRepository.GetById(productId);
-            _subject.Notify(product);
+
+            // 🔥 FIXED HERE
+            _subject.Notify(product.ProductName);
 
             return true;
         }
