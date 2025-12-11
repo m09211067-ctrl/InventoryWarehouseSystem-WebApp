@@ -19,7 +19,7 @@ namespace InventoryWebApp.Models
             {
                 ProductID = 0,
                 ProductName = this.ProductName ,
-                Barcode = this.Barcode ,
+                 Barcode = this.Barcode + "_" + Guid.NewGuid().ToString().Substring(0, 4),
                 Price = this.Price,
                 Quantity = this.Quantity,
                 Description = this.Description,
