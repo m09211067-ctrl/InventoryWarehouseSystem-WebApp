@@ -153,21 +153,21 @@ namespace InventoryWebApp.Controllers
         // ================================
         // 5) نسخ منتج (Prototype Pattern)
         // ================================
-        public IActionResult Clone(int id)
-        {
-            var original = _unitOfWork.ProductRepository.GetById(id);
-            if (original == null)
-                return NotFound();
+       public IActionResult Clone(int id)
+{
+    var original = _unitOfWork.ProductRepository.GetById(id);
+    if (original == null)
+        return NotFound();
 
-            var clone = original.Clone();
-            clone.ProductName ;
+    var clone = original.Clone(); 
 
-            _unitOfWork.ProductRepository.Insert(clone);
-            _unitOfWork.SaveChanges();
+    _unitOfWork.ProductRepository.Insert(clone);
+    _unitOfWork.SaveChanges();
 
-            TempData["Message"] = "✔ تم إنشاء نسخة من المنتج";
-            return RedirectToAction("Index");
-        }
+    TempData["Message"] = "✔ تم إنشاء نسخة من المنتج";
+    return RedirectToAction("Index");
+}
+
 
         // ================================
         // 6) اختبار الاستراتيجيات
