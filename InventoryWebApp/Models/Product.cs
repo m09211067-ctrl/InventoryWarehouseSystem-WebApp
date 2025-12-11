@@ -18,8 +18,8 @@ namespace InventoryWebApp.Models
             return new Product
             {
                 ProductID = 0,
-                ProductName = this.ProductName + " (Copy)",
-                Barcode = this.Barcode + "-C",
+                ProductName = this.ProductName ,
+                Barcode = this.Barcode ,
                 Price = this.Price,
                 Quantity = this.Quantity,
                 Description = this.Description,
