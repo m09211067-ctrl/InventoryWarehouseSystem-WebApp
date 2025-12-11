@@ -160,7 +160,7 @@ namespace InventoryWebApp.Controllers
                 return NotFound();
 
             var clone = original.Clone();
-            clone.ProductName += " (Copy)";
+            clone.ProductName ;
 
             _unitOfWork.ProductRepository.Insert(clone);
             _unitOfWork.SaveChanges();
