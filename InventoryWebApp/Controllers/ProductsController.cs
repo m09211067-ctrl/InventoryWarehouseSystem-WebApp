@@ -37,11 +37,12 @@ namespace InventoryWebApp.Controllers
         [HttpGet]
         public IActionResult Create()
         {
+            ViewBag.Warehouses = _unitOfWork.WarehouseRepository.GetAll();
             return View();
         }
 
         [HttpPost]
-        public IActionResult Create(Product product)
+        public IActionResult Create(Product product, int warehouseId)
         {
             if (!ModelState.IsValid)
                 return View(product);
@@ -64,7 +65,7 @@ namespace InventoryWebApp.Controllers
                 return View(product);
             }
 
-            // Factory Pattern لإنشاء المنتج
+            // ---- Factory Pattern لإنشاء المنتج ----
             var newProduct = ProductFactory.Create(
                 product.ProductName,
                 product.Quantity,
@@ -73,13 +74,37 @@ namespace InventoryWebApp.Controllers
                 product.Description ?? ""
             );
 
-            // إضافة المنتج لقاعدة البيانات
+            // إضافة المنتج في قاعدة البيانات
             _unitOfWork.ProductRepository.Insert(newProduct);
+
+            // ---- إضافة المنتج داخل المخزن المختار ----
+            var stock = new WarehouseStock
+            {
+                WarehouseID = warehouseId,
+                ProductID = newProduct.ProductID,
+                Quantity = newProduct.Quantity
+            };
+
+            _unitOfWork.WarehouseStockRepository.Insert(stock);
+
+            // ---- تسجيل حركة دخول للمخزن ----
+            var movement = new StockMovement
+            {
+                ProductID = newProduct.ProductID,
+                WarehouseID = warehouseId,
+                MovementType = "IN",
+                Quantity = newProduct.Quantity,
+                Date = DateTime.Now
+            };
+
+            _unitOfWork.MovementRepository.Insert(movement);
+
             _unitOfWork.SaveChanges();
 
-            TempData["Message"] = "✔ تم إضافة المنتج بنجاح";
+            TempData["Message"] = "✔ تم إضافة المنتج بنجاح إلى المخزن";
             return RedirectToAction("Index");
         }
+
 
         // ================================
         // 3) تعديل منتج
