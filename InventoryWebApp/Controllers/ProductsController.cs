@@ -8,6 +8,9 @@ using InventoryWebApp.Patterns.Strategy;
 using InventoryWebApp.Patterns.Composite;
 using InventoryWebApp.Patterns.ChainOfResponsibility;
 using InventoryWebApp.Patterns.Builder;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace InventoryWebApp.Controllers
 {
@@ -32,7 +35,7 @@ namespace InventoryWebApp.Controllers
         }
 
         // ================================
-        // 2) صفحة إضافة منتج
+        // 2) إضافة منتج عادي
         // ================================
         [HttpGet]
         public IActionResult Create()
@@ -65,7 +68,7 @@ namespace InventoryWebApp.Controllers
                 return View(product);
             }
 
-            // ---- Factory Pattern لإنشاء المنتج ----
+            // Factory Pattern
             var newProduct = ProductFactory.Create(
                 product.ProductName,
                 product.Quantity,
@@ -74,37 +77,29 @@ namespace InventoryWebApp.Controllers
                 product.Description ?? ""
             );
 
-            // إضافة المنتج في قاعدة البيانات
             _unitOfWork.ProductRepository.Insert(newProduct);
 
-            // ---- إضافة المنتج داخل المخزن المختار ----
-            var stock = new WarehouseStock
+            _unitOfWork.WarehouseStockRepository.Insert(new WarehouseStock
             {
                 WarehouseID = warehouseId,
                 ProductID = newProduct.ProductID,
                 Quantity = newProduct.Quantity
-            };
+            });
 
-            _unitOfWork.WarehouseStockRepository.Insert(stock);
-
-            // ---- تسجيل حركة دخول للمخزن ----
-            var movement = new StockMovement
+            _unitOfWork.MovementRepository.Insert(new StockMovement
             {
                 ProductID = newProduct.ProductID,
                 WarehouseID = warehouseId,
                 MovementType = "IN",
                 Quantity = newProduct.Quantity,
                 Date = DateTime.Now
-            };
-
-            _unitOfWork.MovementRepository.Insert(movement);
+            });
 
             _unitOfWork.SaveChanges();
 
-            TempData["Message"] = "✔ تم إضافة المنتج بنجاح إلى المخزن";
+            TempData["Message"] = "✔ تم إضافة المنتج بنجاح";
             return RedirectToAction("Index");
         }
-
 
         // ================================
         // 3) تعديل منتج
@@ -113,7 +108,6 @@ namespace InventoryWebApp.Controllers
         public IActionResult Edit(int id)
         {
             var product = _unitOfWork.ProductRepository.GetById(id);
-
             if (product == null)
                 return NotFound();
 
@@ -129,29 +123,28 @@ namespace InventoryWebApp.Controllers
             _unitOfWork.ProductRepository.Update(product);
             _unitOfWork.SaveChanges();
 
-            TempData["Message"] = "✔ تم تعديل المنتج بنجاح";
+            TempData["Message"] = "✔ تم تعديل المنتج";
             return RedirectToAction("Index");
         }
 
         // ================================
-        // 4) حذف المنتج
+        // 4) حذف منتج
         // ================================
         public IActionResult Delete(int id)
         {
             var product = _unitOfWork.ProductRepository.GetById(id);
-
             if (product == null)
                 return NotFound();
 
             _unitOfWork.ProductRepository.Delete(id);
             _unitOfWork.SaveChanges();
 
-            TempData["Message"] = "✔ تم حذف المنتج بنجاح";
+            TempData["Message"] = "✔ تم حذف المنتج";
             return RedirectToAction("Index");
         }
 
         // ================================
-        // 5) نسخ منتج (Prototype Pattern)
+        // 5) استنساخ منتج (Prototype)
         // ================================
         public IActionResult Clone(int id)
         {
@@ -160,7 +153,6 @@ namespace InventoryWebApp.Controllers
                 return NotFound();
 
             var clone = original.Clone();
-
             _unitOfWork.ProductRepository.Insert(clone);
             _unitOfWork.SaveChanges();
 
@@ -168,26 +160,90 @@ namespace InventoryWebApp.Controllers
             return RedirectToAction("Index");
         }
 
+        // ================================
+        // 6) تفاصيل منتج
+        // ================================
+        public IActionResult Details(int id)
+        {
+            var product = _unitOfWork.ProductRepository.GetById(id);
+            if (product == null)
+                return NotFound();
+
+            return View(product);
+        }
 
         // ================================
-        // 6) اختبار الاستراتيجيات
+        // 7) إنشاء منتج مركب (Builder + BOM)
+        // ================================
+        [HttpGet]
+        public IActionResult BuildComposite()
+        {
+            var composite = _facade.BuildComputerProduct();
+
+            ViewBag.Warehouses = _unitOfWork.WarehouseRepository.GetAll();
+
+            // منع اختيار المنتجات المركبة كمكونات
+            ViewBag.Components = _unitOfWork.ProductRepository
+                .GetAll()
+                .Where(p => !p.IsComposite)
+                .ToList();
+
+            return View(composite);
+        }
+
+        [HttpPost]
+        public IActionResult SaveComposite(
+            string productName,
+            int finalQuantity,
+            int warehouseId,
+            int[] componentIds,
+            Dictionary<int, int> componentQuantities)
+        {
+            if (string.IsNullOrWhiteSpace(productName) ||
+                finalQuantity <= 0 ||
+                warehouseId <= 0 ||
+                componentIds == null || componentIds.Length == 0)
+            {
+                TempData["Message"] = "❌ بيانات غير مكتملة";
+                return RedirectToAction("BuildComposite");
+            }
+
+            try
+            {
+                _facade.CreateCompositeFromComponents(
+                    productName,
+                    finalQuantity,
+                    warehouseId,
+                    componentIds,
+                    componentQuantities
+                );
+
+                TempData["Message"] = "✔ تم إنشاء المنتج المركب وخصم المكونات";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                TempData["Message"] = "❌ " + ex.Message;
+                return RedirectToAction("BuildComposite");
+            }
+        }
+
+        // ================================
+        // 8) Strategy Pattern Test
         // ================================
         public IActionResult TestStrategy()
         {
             var calc = new PriceCalculator(new BasicPriceStrategy());
-            var normal = calc.Calculate(100, 5);
+            ViewBag.Normal = calc.Calculate(100, 5);
 
             calc.SetStrategy(new QuantityDiscountStrategy());
-            var discounted = calc.Calculate(100, 15);
-
-            ViewBag.Normal = normal;
-            ViewBag.Discounted = discounted;
+            ViewBag.Discounted = calc.Calculate(100, 15);
 
             return View();
         }
 
         // ================================
-        // 7) Decorator Pattern Test
+        // 9) Decorator Pattern Test
         // ================================
         public IActionResult DecoratorTest()
         {
@@ -199,7 +255,7 @@ namespace InventoryWebApp.Controllers
         }
 
         // ================================
-        // 8) Composite Pattern Test
+        // 10) Composite Pattern Test
         // ================================
         public IActionResult CompositeTest()
         {
@@ -212,77 +268,5 @@ namespace InventoryWebApp.Controllers
 
             return Content($"Bundle Price = {bundle.GetPrice()}");
         }
-
-        public IActionResult Details(int id)
-        {
-            var product = _unitOfWork.ProductRepository.GetById(id);
-
-            if (product == null)
-                return NotFound();
-
-            return View(product);
-        }
-
-        public IActionResult CreateComposite(int warehouseId)
-        {
-            _Facade.AddCompositeProduct(warehouseId);
-
-            TempData["Message"] = "✔ تم إضافة منتج مركب بنجاح";
-            return RedirectToAction("Index");
-        }
-
-
-
-        public IActionResult BuildComposite()
-        {
-            var composite = _facade.BuildComputerProduct();
-            ViewBag.Warehouses = _unitOfWork.WarehouseRepository.GetAll();
-            ViewBag.Components = _unitOfWork.ProductRepository.GetAll();
-            return View(composite);
-        }
-
-        [HttpPost]
-        public IActionResult SaveComposite(
-      string productName,
-      int finalQuantity,
-      int warehouseId,
-      int[] componentIds,
-      Dictionary<int, int> componentQuantities)
-        {
-            // تحقق مبدئي بسيط (بدون منطق أعمال)
-            if (string.IsNullOrWhiteSpace(productName) ||
-                finalQuantity <= 0 ||
-                warehouseId <= 0 ||
-                componentIds == null || componentIds.Length == 0)
-            {
-                TempData["Message"] = "❌ بيانات غير مكتملة لإنشاء المنتج المركب";
-                return RedirectToAction("BuildComposite");
-            }
-
-            try
-            {
-                // تمرير كل شيء للـ Facade (هو من يدير المنطق)
-                _facade.CreateCompositeFromComponents(
-                    productName,
-                    finalQuantity,
-                    warehouseId,
-                    componentIds,
-                    componentQuantities
-                );
-
-                TempData["Message"] = "✔ تم إنشاء المنتج المركب وخصم المكونات من المخزون";
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                // أي خطأ أعمال (كمية غير كافية…)
-                TempData["Message"] = "❌ " + ex.Message;
-                return RedirectToAction("BuildComposite");
-            }
-        }
-
-
-
-
     }
 }
