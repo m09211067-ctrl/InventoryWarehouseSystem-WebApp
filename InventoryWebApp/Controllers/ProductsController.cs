@@ -178,12 +178,12 @@ namespace InventoryWebApp.Controllers
         [HttpGet]
         public IActionResult BuildComposite()
         {
-            var composite = _facade.BuildComputerProduct();
+            var emptyProduct = new Product();
 
             ViewBag.Warehouses = _unitOfWork.WarehouseRepository.GetAll();
             ViewBag.Components = _unitOfWork.ProductRepository.GetAll();
 
-            return View(composite);
+            return View(emptyProduct);
         }
 
 
