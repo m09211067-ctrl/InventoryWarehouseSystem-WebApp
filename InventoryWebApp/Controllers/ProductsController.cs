@@ -181,15 +181,11 @@ namespace InventoryWebApp.Controllers
             var composite = _facade.BuildComputerProduct();
 
             ViewBag.Warehouses = _unitOfWork.WarehouseRepository.GetAll();
-
-            // منع اختيار المنتجات المركبة كمكونات
-            ViewBag.Components = _unitOfWork.ProductRepository
-                .GetAll()
-                .Where(p => !p.IsComposite)
-                .ToList();
+            ViewBag.Components = _unitOfWork.ProductRepository.GetAll();
 
             return View(composite);
         }
+
 
         [HttpPost]
         public IActionResult SaveComposite(
