@@ -1,62 +1,80 @@
 @model InventoryWebApp.Models.Product
 
 @{
-    ViewData["Title"] = "منتج مركب (Builder Pattern)";
+    ViewData["Title"] = "إنشاء منتج مركب";
 }
 
 <div class="container mt-4" dir="rtl">
-    <h2 class="mb-4 text-center">🧩 منتج مركب تم بناؤه باستخدام Builder Pattern</h2>
+    <h2 class="text-center mb-4">🧩 إنشاء منتج مركب (BOM)</h2>
 
-    <div class="card shadow-sm">
-        <div class="card-body">
+    <form asp-action="SaveComposite" method="post">
 
-            <h4 class="mb-3">@Model.ProductName</h4>
-
-            <p><strong>الباركود:</strong> @Model.Barcode</p>
-            <p><strong>السعر:</strong> @Model.Price</p>
-            <p><strong>الكمية:</strong> @Model.Quantity</p>
-
-            @if (Model.Components != null && Model.Components.Any())
-            {
-                <h5 class="mt-3">المكوّنات:</h5>
-                <ul class="list-group mb-3">
-                    @foreach (var c in Model.Components)
-                    {
-                        <li class="list-group-item">@c</li>
-                    }
-                </ul>
-            }
-            else
-            {
-                <p class="text-muted">لا توجد مكوّنات معرفّة لهذا المنتج.</p>
-            }
-
-            <div class="alert alert-info mt-3">
-                ✅ هذا المنتج تم إنشاؤه برمجيًا عن طريق
-                <strong>ProductDirector</strong> و
-                <strong>CompositeProductBuilder</strong>
-                (نمط <em>Builder</em>).
-            </div>
-
-            <!-- ====== زر الحفظ الفعلي ====== -->
-            <form asp-action="SaveComposite" method="post" class="mt-4">
-
-                <div class="mb-3">
-                    <label class="form-label">اختر المخزن</label>
-                    <select name="warehouseId" class="form-control" required>
-                        <!-- مؤقتًا مخزن افتراضي -->
-                        <option value="1">المخزن الرئيسي</option>
-                    </select>
+        <!-- معلومات المنتج النهائي -->
+        <div class="card mb-3">
+            <div class="card-header">📦 المنتج النهائي</div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <label>اسم المنتج</label>
+                    <input type="text" name="productName"
+                           class="form-control"
+                           value="@Model.ProductName" required />
                 </div>
 
-                <button type="submit" class="btn btn-success">
-                    💾 حفظ المنتج المركب
-                </button>
-
-                <a href="/Products" class="btn btn-secondary ms-2">
-                    ⬅ رجوع لقائمة المنتجات
-                </a>
-            </form>
+                <div class="mb-2">
+                    <label>الكمية المنتَجة</label>
+                    <input type="number" name="finalQuantity"
+                           class="form-control" value="1" min="1" required />
+                </div>
+            </div>
         </div>
-    </div>
+
+        <!-- اختيار المخزن -->
+        <div class="card mb-3">
+            <div class="card-header">🏬 اختيار المخزن</div>
+            <div class="card-body">
+                <select name="warehouseId" class="form-control" required>
+                    <option value="">-- اختر مخزن --</option>
+                    @foreach (var w in ViewBag.Warehouses)
+                    {
+                        <option value="@w.WarehouseID">
+                            @w.WarehouseName (@w.BranchName)
+                        </option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <!-- اختيار المكونات -->
+        <div class="card mb-3">
+            <div class="card-header">🧱 مكونات المنتج</div>
+            <div class="card-body">
+
+                @foreach (var c in ViewBag.Components)
+                {
+                    <div class="row mb-2 align-items-center">
+                        <div class="col-6">
+                            <input type="checkbox"
+                                   name="componentIds"
+                                   value="@c.ProductID" />
+                            @c.ProductName (متوفر: @c.Quantity)
+                        </div>
+                        <div class="col-6">
+                            <input type="number"
+                                   name="componentQuantities[@c.ProductID]"
+                                   class="form-control"
+                                   placeholder="الكمية"
+                                   min="1" />
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-success">
+            💾 حفظ المنتج المركب
+        </button>
+
+        <a asp-action="Index" class="btn btn-secondary ms-2">إلغاء</a>
+    </form>
 </div>
