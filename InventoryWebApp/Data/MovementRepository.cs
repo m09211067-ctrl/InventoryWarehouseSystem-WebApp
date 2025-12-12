@@ -144,5 +144,17 @@ namespace InventoryWebApp.Data
         {
             return GetAll();
         }
+
+        public void DeleteByProductId(int productId)
+        {
+            using var conn = _db.GetConnection();
+            conn.Open();
+
+            string query = "DELETE FROM StockMovement WHERE ProductID = @p";
+            using var cmd = new SqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@p", productId);
+            cmd.ExecuteNonQuery();
+        }
+
     }
 }

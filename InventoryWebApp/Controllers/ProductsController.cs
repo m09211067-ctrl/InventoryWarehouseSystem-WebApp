@@ -136,10 +136,20 @@ namespace InventoryWebApp.Controllers
             if (product == null)
                 return NotFound();
 
-            _unitOfWork.ProductRepository.Delete(id);
-            _unitOfWork.SaveChanges();
+            try
+            {
+                _unitOfWork.WarehouseStockRepository.DeleteByProductId(id);
+                _unitOfWork.MovementRepository.DeleteByProductId(id);
+                _unitOfWork.ProductRepository.Delete(id);
 
-            TempData["Message"] = "✔ تم حذف المنتج";
+                _unitOfWork.SaveChanges();
+                TempData["Message"] = "✔ تم حذف المنتج بنجاح";
+            }
+            catch (Exception ex)
+            {
+                TempData["Message"] = "❌ لا يمكن حذف المنتج: " + ex.Message;
+            }
+
             return RedirectToAction("Index");
         }
 

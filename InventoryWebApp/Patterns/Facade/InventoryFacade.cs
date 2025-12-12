@@ -233,6 +233,7 @@ namespace InventoryWebApp.Patterns
             builder.SetName(productName);
             builder.SetPrice(totalPrice);
             builder.SetQuantity(finalQuantity);
+            builder.SetBarcode($"CMP_{Guid.NewGuid().ToString().Substring(0, 8)}");
 
             foreach (var comp in components)
             {
