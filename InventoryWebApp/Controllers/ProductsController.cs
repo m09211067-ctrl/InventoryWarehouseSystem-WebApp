@@ -236,6 +236,8 @@ namespace InventoryWebApp.Controllers
         public IActionResult BuildComposite()
         {
             var composite = _facade.BuildComputerProduct();
+            ViewBag.Warehouses = _unitOfWork.WarehouseRepository.GetAll();
+            ViewBag.Components = _unitOfWork.ProductRepository.GetAll();
             return View(composite);
         }
 
