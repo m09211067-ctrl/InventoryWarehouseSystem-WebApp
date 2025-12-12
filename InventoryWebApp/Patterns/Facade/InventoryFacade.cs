@@ -219,14 +219,24 @@ namespace InventoryWebApp.Patterns
                 }
             }
 
+
             // 3) حساب السعر النهائي (BOM)
             decimal totalPrice = 0;
+
             foreach (var comp in components)
             {
+                if (comp.Price <= 0)
+                    throw new Exception($"❌ سعر المكوّن {comp.ProductName} غير صالح");
+
                 int qtyPerUnit = componentQuantities[comp.ProductID];
+
+                // سعر المكوّن للوحدة
                 totalPrice += comp.Price * qtyPerUnit;
             }
+
+            // ضرب في عدد الوحدات المنتجة
             totalPrice *= finalQuantity;
+
 
             // 4) بناء المنتج المركب (Builder)
             var builder = new CompositeProductBuilder();
