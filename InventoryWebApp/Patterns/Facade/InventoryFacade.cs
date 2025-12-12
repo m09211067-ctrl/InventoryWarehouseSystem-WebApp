@@ -134,42 +134,42 @@ namespace InventoryWebApp.Patterns
 
             return true;
         }
-        
+
 
         public void AddCompositeProduct(int warehouseId)
-{
-    // Builder
-    var builder = new CompositeProductBuilder();
-    var director = new ProductDirector();
-    var product = director.BuildComputer(builder);
+        {
+            // Builder
+            var builder = new CompositeProductBuilder();
+            var director = new ProductDirector();
+            var product = director.BuildComputer(builder);
 
-    // إدراج المنتج
-    _uow.ProductRepository.Insert(product);
+            // إدراج المنتج
+            _uow.ProductRepository.Insert(product);
 
-    // إدخاله في المخزن
-    var stock = new WarehouseStock
-    {
-        WarehouseID = warehouseId,
-        ProductID = product.ProductID,
-        Quantity = product.Quantity
-    };
+            // إدخاله في المخزن
+            var stock = new WarehouseStock
+            {
+                WarehouseID = warehouseId,
+                ProductID = product.ProductID,
+                Quantity = product.Quantity
+            };
 
-    _uow.WarehouseStockRepository.Insert(stock);
+            _uow.WarehouseStockRepository.Insert(stock);
 
-    // تسجيل حركة
-    var movement = new StockMovement
-    {
-        ProductID = product.ProductID,
-        WarehouseID = warehouseId,
-        MovementType = "IN",
-        Quantity = product.Quantity,
-        Date = DateTime.Now
-    };
+            // تسجيل حركة
+            var movement = new StockMovement
+            {
+                ProductID = product.ProductID,
+                WarehouseID = warehouseId,
+                MovementType = "IN",
+                Quantity = product.Quantity,
+                Date = DateTime.Now
+            };
 
-    _uow.MovementRepository.Insert(movement);
+            _uow.MovementRepository.Insert(movement);
 
-    _uow.SaveChanges();
-}
+            _uow.SaveChanges();
+        }
 
 
         // --------------------------------------------------------
@@ -181,5 +181,113 @@ namespace InventoryWebApp.Patterns
             var director = new ProductDirector();
             return director.BuildComputer(builder);
         }
+
+        public void CreateCompositeFromComponents(
+    string productName,
+    int finalQuantity,
+    int warehouseId,
+    int[] componentIds,
+    Dictionary<int, int> componentQuantities)
+        {
+            // 1) جلب المنتجات (المكونات)
+            var components = new List<Product>();
+            foreach (var compId in componentIds)
+            {
+                var product = _uow.ProductRepository.GetById(compId);
+                if (product == null)
+                    throw new Exception("❌ أحد المكونات غير موجود");
+
+                components.Add(product);
+            }
+
+            // 2) التحقق من توفر الكميات في المخزن
+            foreach (var comp in components)
+            {
+                if (!componentQuantities.ContainsKey(comp.ProductID))
+                    throw new Exception($"❌ لم يتم تحديد كمية للمكوّن: {comp.ProductName}");
+
+                int requiredPerUnit = componentQuantities[comp.ProductID];
+                int totalRequired = requiredPerUnit * finalQuantity;
+
+                int available =
+                    _uow.WarehouseStockRepository.GetStock(comp.ProductID, warehouseId);
+
+                if (available < totalRequired)
+                {
+                    throw new Exception(
+                        $"❌ الكمية غير كافية للمكوّن {comp.ProductName} (المتوفر: {available}, المطلوب: {totalRequired})");
+                }
+            }
+
+            // 3) حساب السعر النهائي (BOM)
+            decimal totalPrice = 0;
+            foreach (var comp in components)
+            {
+                int qtyPerUnit = componentQuantities[comp.ProductID];
+                totalPrice += comp.Price * qtyPerUnit;
+            }
+            totalPrice *= finalQuantity;
+
+            // 4) بناء المنتج المركب (Builder)
+            var builder = new CompositeProductBuilder();
+            builder.SetName(productName);
+            builder.SetPrice(totalPrice);
+            builder.SetQuantity(finalQuantity);
+
+            foreach (var comp in components)
+            {
+                int qtyPerUnit = componentQuantities[comp.ProductID];
+                builder.AddComponent($"{comp.ProductName} × {qtyPerUnit}");
+            }
+
+            var compositeProduct = builder.Build();
+
+            // 5) حفظ المنتج المركب
+            _uow.ProductRepository.Insert(compositeProduct);
+
+            // 6) إدخال المنتج المركب إلى المخزن
+            _uow.WarehouseStockRepository.Insert(new WarehouseStock
+            {
+                WarehouseID = warehouseId,
+                ProductID = compositeProduct.ProductID,
+                Quantity = finalQuantity
+            });
+
+            // تسجيل حركة دخول للمنتج المركب
+            _uow.MovementRepository.Insert(new StockMovement
+            {
+                ProductID = compositeProduct.ProductID,
+                WarehouseID = warehouseId,
+                MovementType = "IN",
+                Quantity = finalQuantity,
+                Date = DateTime.Now
+            });
+
+            // 7) خصم المكونات من المخزون + تسجيل الحركات
+            foreach (var comp in components)
+            {
+                int totalRequired =
+                    componentQuantities[comp.ProductID] * finalQuantity;
+
+                _uow.WarehouseStockRepository.DecreaseStock(
+                    warehouseId,
+                    comp.ProductID,
+                    totalRequired
+                );
+
+                _uow.MovementRepository.Insert(new StockMovement
+                {
+                    ProductID = comp.ProductID,
+                    WarehouseID = warehouseId,
+                    MovementType = "OUT",
+                    Quantity = totalRequired,
+                    Date = DateTime.Now
+                });
+            }
+
+            // 8) حفظ كل التغييرات
+            _uow.SaveChanges();
+        }
+
     }
 }
