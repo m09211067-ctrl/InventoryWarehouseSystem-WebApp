@@ -225,7 +225,7 @@ namespace InventoryWebApp.Controllers
 
         public IActionResult CreateComposite(int warehouseId)
         {
-            _inventoryFacade.AddCompositeProduct(warehouseId);
+            _Facade.AddCompositeProduct(warehouseId);
 
             TempData["Message"] = "✔ تم إضافة منتج مركب بنجاح";
             return RedirectToAction("Index");
