@@ -34,10 +34,29 @@
             <div class="alert alert-info mt-3">
                 ✅ هذا المنتج تم إنشاؤه برمجيًا عن طريق
                 <strong>ProductDirector</strong> و
-                <strong>CompositeProductBuilder</strong> (نمط <em>Builder</em>).
+                <strong>CompositeProductBuilder</strong>
+                (نمط <em>Builder</em>).
             </div>
 
-            <a href="/Products" class="btn btn-secondary mt-2">⬅ رجوع لقائمة المنتجات</a>
+            <!-- ====== زر الحفظ الفعلي ====== -->
+            <form asp-action="SaveComposite" method="post" class="mt-4">
+
+                <div class="mb-3">
+                    <label class="form-label">اختر المخزن</label>
+                    <select name="warehouseId" class="form-control" required>
+                        <!-- مؤقتًا مخزن افتراضي -->
+                        <option value="1">المخزن الرئيسي</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    💾 حفظ المنتج المركب
+                </button>
+
+                <a href="/Products" class="btn btn-secondary ms-2">
+                    ⬅ رجوع لقائمة المنتجات
+                </a>
+            </form>
         </div>
     </div>
 </div>

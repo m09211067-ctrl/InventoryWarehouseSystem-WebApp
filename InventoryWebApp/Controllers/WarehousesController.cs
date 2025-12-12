@@ -8,7 +8,7 @@ namespace InventoryWebApp.Controllers
     {
         private readonly UnitOfWork _unitOfWork;
 
-        // 🤝 استخدام DI بدلاً من new UnitOfWork()
+        
         public WarehousesController(UnitOfWork uow)
         {
             _unitOfWork = uow;
@@ -91,5 +91,20 @@ namespace InventoryWebApp.Controllers
             TempData["Message"] = "✔ تم حذف المخزن بنجاح";
             return RedirectToAction("Index");
         }
+
+       public IActionResult Details(int id)
+{
+    var warehouse = _unitOfWork.WarehouseRepository.GetById(id);
+    if (warehouse == null)
+        return NotFound();
+
+    var products = _unitOfWork.WarehouseStockRepository
+        .GetProductsByWarehouse(id);
+
+    ViewBag.Warehouse = warehouse;
+    return View(products);
+}
+
+
     }
 }

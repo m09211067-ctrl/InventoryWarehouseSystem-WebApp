@@ -1,0 +1,29 @@
+@model List<InventoryWebApp.Models.WarehouseStock>
+
+<h2 class="mb-4">
+    🏬 المخزن: @ViewBag.Warehouse.WarehouseName
+</h2>
+
+<table class="table table-bordered table-striped text-center">
+    <thead class="table-dark">
+        <tr>
+            <th>اسم المنتج</th>
+            <th>الباركود</th>
+            <th>السعر</th>
+            <th>الكمية</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Product?.ProductName</td>
+                <td>@item.Product?.Barcode</td>
+                <td>@item.Product?.Price</td>
+                <td>@item.Quantity</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Index" class="btn btn-secondary">⬅ رجوع</a>

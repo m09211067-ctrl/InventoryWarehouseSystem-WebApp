@@ -134,6 +134,43 @@ namespace InventoryWebApp.Patterns
 
             return true;
         }
+        
+
+        public void AddCompositeProduct(int warehouseId)
+{
+    // Builder
+    var builder = new CompositeProductBuilder();
+    var director = new ProductDirector();
+    var product = director.BuildComputer(builder);
+
+    // إدراج المنتج
+    _uow.ProductRepository.Insert(product);
+
+    // إدخاله في المخزن
+    var stock = new WarehouseStock
+    {
+        WarehouseID = warehouseId,
+        ProductID = product.ProductID,
+        Quantity = product.Quantity
+    };
+
+    _uow.WarehouseStockRepository.Insert(stock);
+
+    // تسجيل حركة
+    var movement = new StockMovement
+    {
+        ProductID = product.ProductID,
+        WarehouseID = warehouseId,
+        MovementType = "IN",
+        Quantity = product.Quantity,
+        Date = DateTime.Now
+    };
+
+    _uow.MovementRepository.Insert(movement);
+
+    _uow.SaveChanges();
+}
+
 
         // --------------------------------------------------------
         // 7) Builder

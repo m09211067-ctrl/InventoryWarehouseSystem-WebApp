@@ -223,12 +223,31 @@ namespace InventoryWebApp.Controllers
             return View(product);
         }
 
+        public IActionResult CreateComposite(int warehouseId)
+{
+    _inventoryFacade.AddCompositeProduct(warehouseId);
+
+    TempData["Message"] = "✔ تم إضافة منتج مركب بنجاح";
+    return RedirectToAction("Index");
+}
+
+
 
         public IActionResult BuildComposite()
         {
             var composite = _facade.BuildComputerProduct();
             return View(composite);
         }
+
+        [HttpPost]
+public IActionResult SaveComposite(int warehouseId)
+{
+    _facade.AddCompositeProduct(warehouseId);
+
+    TempData["Message"] = "✔ تم حفظ المنتج المركب بنجاح";
+    return RedirectToAction("Index");
+}
+
 
 
 

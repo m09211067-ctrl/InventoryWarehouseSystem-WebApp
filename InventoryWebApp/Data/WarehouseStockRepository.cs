@@ -188,6 +188,54 @@ namespace InventoryWebApp.Data
             return null;
         }
 
+        // ========================================
+//   جلب كل المنتجات داخل مخزن معيّن
+// ========================================
+public List<WarehouseStock> GetProductsByWarehouse(int warehouseId)
+{
+    var list = new List<WarehouseStock>();
+
+    using var conn = _db.GetConnection();
+    conn.Open();
+
+    string query = @"
+        SELECT 
+            ws.WarehouseID,
+            ws.ProductID,
+            ws.Quantity,
+            p.ProductName,
+            p.Barcode,
+            p.Price
+        FROM WarehouseStock ws
+        INNER JOIN Products p ON ws.ProductID = p.ProductID
+        WHERE ws.WarehouseID = @wid
+    ";
+
+    using var cmd = new SqlCommand(query, conn);
+    cmd.Parameters.AddWithValue("@wid", warehouseId);
+
+    using var reader = cmd.ExecuteReader();
+    while (reader.Read())
+    {
+        list.Add(new WarehouseStock
+        {
+            WarehouseID = (int)reader["WarehouseID"],
+            ProductID = (int)reader["ProductID"],
+            Quantity = Convert.ToInt32(reader["Quantity"]),
+            Product = new Product
+            {
+                ProductID = (int)reader["ProductID"],
+                ProductName = reader["ProductName"].ToString() ?? "",
+                Barcode = reader["Barcode"].ToString() ?? "",
+                Price = (decimal)reader["Price"]
+            }
+        });
+    }
+
+    return list;
+}
+
+
     }
 
 }

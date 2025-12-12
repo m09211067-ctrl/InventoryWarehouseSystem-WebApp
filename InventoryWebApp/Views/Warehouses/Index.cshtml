@@ -26,12 +26,13 @@
                 <th style="width: 200px;">العمليات</th>
             </tr>
         </thead>
+
         <tbody>
             @if (Model != null && Model.Any())
             {
                 foreach (var w in Model)
                 {
-                    <tr>
+                    <tr ondblclick="openWarehouse(@w.WarehouseID)" style="cursor:pointer">
                         <td>@w.WarehouseID</td>
                         <td>@w.WarehouseName</td>
                         <td>@w.BranchName</td>
@@ -54,3 +55,9 @@
     </table>
 
 </div>
+
+<script>
+    function openWarehouse(id) {
+        window.location.href = '/Warehouses/Details/' + id;
+    }
+</script>
