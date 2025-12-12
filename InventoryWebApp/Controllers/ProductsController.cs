@@ -153,20 +153,20 @@ namespace InventoryWebApp.Controllers
         // ================================
         // 5) نسخ منتج (Prototype Pattern)
         // ================================
-       public IActionResult Clone(int id)
-{
-    var original = _unitOfWork.ProductRepository.GetById(id);
-    if (original == null)
-        return NotFound();
+        public IActionResult Clone(int id)
+        {
+            var original = _unitOfWork.ProductRepository.GetById(id);
+            if (original == null)
+                return NotFound();
 
-    var clone = original.Clone(); 
+            var clone = original.Clone();
 
-    _unitOfWork.ProductRepository.Insert(clone);
-    _unitOfWork.SaveChanges();
+            _unitOfWork.ProductRepository.Insert(clone);
+            _unitOfWork.SaveChanges();
 
-    TempData["Message"] = "✔ تم إنشاء نسخة من المنتج";
-    return RedirectToAction("Index");
-}
+            TempData["Message"] = "✔ تم إنشاء نسخة من المنتج";
+            return RedirectToAction("Index");
+        }
 
 
         // ================================
@@ -224,12 +224,12 @@ namespace InventoryWebApp.Controllers
         }
 
         public IActionResult CreateComposite(int warehouseId)
-{
-    _inventoryFacade.AddCompositeProduct(warehouseId);
+        {
+            _inventoryFacade.AddCompositeProduct(warehouseId);
 
-    TempData["Message"] = "✔ تم إضافة منتج مركب بنجاح";
-    return RedirectToAction("Index");
-}
+            TempData["Message"] = "✔ تم إضافة منتج مركب بنجاح";
+            return RedirectToAction("Index");
+        }
 
 
 
@@ -240,13 +240,44 @@ namespace InventoryWebApp.Controllers
         }
 
         [HttpPost]
-public IActionResult SaveComposite(int warehouseId)
-{
-    _facade.AddCompositeProduct(warehouseId);
+        public IActionResult SaveComposite(
+      string productName,
+      int finalQuantity,
+      int warehouseId,
+      int[] componentIds,
+      Dictionary<int, int> componentQuantities)
+        {
+            // تحقق مبدئي بسيط (بدون منطق أعمال)
+            if (string.IsNullOrWhiteSpace(productName) ||
+                finalQuantity <= 0 ||
+                warehouseId <= 0 ||
+                componentIds == null || componentIds.Length == 0)
+            {
+                TempData["Message"] = "❌ بيانات غير مكتملة لإنشاء المنتج المركب";
+                return RedirectToAction("BuildComposite");
+            }
 
-    TempData["Message"] = "✔ تم حفظ المنتج المركب بنجاح";
-    return RedirectToAction("Index");
-}
+            try
+            {
+                // تمرير كل شيء للـ Facade (هو من يدير المنطق)
+                _facade.CreateCompositeFromComponents(
+                    productName,
+                    finalQuantity,
+                    warehouseId,
+                    componentIds,
+                    componentQuantities
+                );
+
+                TempData["Message"] = "✔ تم إنشاء المنتج المركب وخصم المكونات من المخزون";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                // أي خطأ أعمال (كمية غير كافية…)
+                TempData["Message"] = "❌ " + ex.Message;
+                return RedirectToAction("BuildComposite");
+            }
+        }
 
 
 
