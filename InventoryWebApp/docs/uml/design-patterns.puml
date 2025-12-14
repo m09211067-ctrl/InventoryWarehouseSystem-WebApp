@@ -1,4 +1,5 @@
-@startuml
+@startuml InventoryWebAppDesignPatterns
+!pragma layout smetana
 skinparam classAttributeIconSize 0
 skinparam packageStyle rectangle
 skinparam shadowing false
