@@ -1,0 +1,162 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam shadowing false
+title InventoryWebApp – Unified Design Patterns UML
+
+' ===================== Controllers =====================
+package "Controllers" {
+  class ProductsController
+  class StockController
+  class WarehousesController
+}
+
+' ===================== Facade =====================
+package "Facade Pattern" {
+  class InventoryFacade
+}
+
+' ===================== Unit Of Work =====================
+package "Unit Of Work" {
+  class UnitOfWork
+}
+
+' ===================== Repositories =====================
+package "Repositories" {
+  class ProductRepository
+  class WarehouseRepository
+  class WarehouseStockRepository
+  class MovementRepository
+}
+
+' ===================== Abstract Factory =====================
+package "Abstract Factory Pattern" {
+  interface IInventoryEntityFactory {
+    +CreateProduct()
+    +CreateWarehouseStock()
+    +CreateMovement()
+  }
+
+  class DefaultInventoryFactory
+}
+
+' ===================== Builder =====================
+package "Builder Pattern" {
+  interface IProductBuilder {
+    +SetName()
+    +SetBarcode()
+    +SetPrice()
+    +SetQuantity()
+    +AddComponent()
+    +Build()
+  }
+
+  class CompositeProductBuilder
+  class ProductDirector
+}
+
+' ===================== Adapter =====================
+package "Adapter Pattern" {
+  interface ICurrencyService {
+    +GetExchangeRate()
+  }
+
+  class CurrencyAdapter
+  class ExternalCurrencyAPI
+}
+
+' ===================== Prototype =====================
+package "Prototype Pattern" {
+  interface ICloneableProduct {
+    +Clone()
+  }
+}
+
+' ===================== Command =====================
+package "Command Pattern" {
+  interface ICommand {
+    +Execute()
+    +Undo()
+  }
+
+  class AddStockCommand
+  class RemoveStockCommand
+  class TransferStockCommand
+  class CommandInvoker
+}
+
+' ===================== Observer =====================
+package "Observer Pattern" {
+  class StockSubject
+  class LowStockObserver
+}
+
+' ===================== Strategy =====================
+package "Strategy Pattern" {
+  interface IPriceStrategy {
+    +Calculate()
+  }
+
+  class BasicPriceStrategy
+  class QuantityDiscountStrategy
+  class PriceCalculator
+}
+
+' ===================== Models =====================
+package "Models" {
+  class Product
+  class Warehouse
+  class WarehouseStock
+  class StockMovement
+}
+
+' ===================== Relationships =====================
+
+' Controllers -> Facade
+ProductsController --> InventoryFacade
+StockController --> InventoryFacade
+WarehousesController --> InventoryFacade
+
+' Facade Core Dependencies
+InventoryFacade --> UnitOfWork
+InventoryFacade --> IInventoryEntityFactory
+InventoryFacade --> ICurrencyService
+InventoryFacade --> CommandInvoker
+InventoryFacade --> StockSubject
+
+' Unit Of Work -> Repositories
+UnitOfWork --> ProductRepository
+UnitOfWork --> WarehouseRepository
+UnitOfWork --> WarehouseStockRepository
+UnitOfWork --> MovementRepository
+
+' Abstract Factory
+IInventoryEntityFactory <|-- DefaultInventoryFactory
+
+' Builder
+ProductDirector --> IProductBuilder
+IProductBuilder <|-- CompositeProductBuilder
+CompositeProductBuilder --> Product
+
+' Adapter
+ICurrencyService <|-- CurrencyAdapter
+CurrencyAdapter --> ExternalCurrencyAPI
+
+' Prototype
+ICloneableProduct <|-- Product
+
+' Command
+CommandInvoker --> ICommand
+ICommand <|-- AddStockCommand
+ICommand <|-- RemoveStockCommand
+ICommand <|-- TransferStockCommand
+
+' Observer
+StockSubject --> LowStockObserver
+
+' Strategy
+PriceCalculator --> IPriceStrategy
+IPriceStrategy <|-- BasicPriceStrategy
+IPriceStrategy <|-- QuantityDiscountStrategy
+
+@enduml
