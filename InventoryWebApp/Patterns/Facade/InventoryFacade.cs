@@ -228,7 +228,7 @@ namespace InventoryWebApp.Patterns
                 if (comp.Price <= 0)
                     throw new Exception($"❌ سعر المكوّن {comp.ProductName} غير صالح");
 
-                int qtyPerUnit = componentQuantities[comp.productId];
+                int qtyPerUnit = componentQuantities[comp.ProductID];
 
                 // سعر المكوّن للوحدة
                 totalPrice += comp.Price * qtyPerUnit;
