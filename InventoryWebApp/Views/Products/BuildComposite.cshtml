@@ -15,15 +15,21 @@
             <div class="card-body">
                 <div class="mb-2">
                     <label>اسم المنتج</label>
-                    <input type="text" name="productName"
+                    <input type="text"
+                           name="productName"
                            class="form-control"
-                           value="@Model.ProductName" required />
+                           value="@Model.ProductName"
+                           required />
                 </div>
 
                 <div class="mb-2">
                     <label>الكمية المنتَجة</label>
-                    <input type="number" name="finalQuantity"
-                           class="form-control" value="1" min="1" required />
+                    <input type="number"
+                           name="finalQuantity"
+                           class="form-control"
+                           value="1"
+                           min="1"
+                           required />
                 </div>
             </div>
         </div>
@@ -55,15 +61,19 @@
                         <div class="col-6">
                             <input type="checkbox"
                                    name="componentIds"
-                                   value="@c.ProductID" />
+                                   value="@c.ProductID"
+                                   onchange="toggleQty(this)" />
+
                             @c.ProductName (متوفر: @c.Quantity)
                         </div>
+
                         <div class="col-6">
                             <input type="number"
                                    name="componentQuantities[@c.ProductID]"
                                    class="form-control"
                                    placeholder="الكمية"
-                                   min="1" />
+                                   min="1"
+                                   disabled />
                         </div>
                     </div>
                 }
@@ -78,3 +88,20 @@
         <a asp-action="Index" class="btn btn-secondary ms-2">إلغاء</a>
     </form>
 </div>
+
+<script>
+    function toggleQty(checkbox) {
+        const qtyInput = checkbox
+            .closest('.row')
+            .querySelector('input[type="number"]');
+
+        qtyInput.disabled = !checkbox.checked;
+
+        if (checkbox.checked) {
+            qtyInput.required = true;
+        } else {
+            qtyInput.required = false;
+            qtyInput.value = '';
+        }
+    }
+</script>

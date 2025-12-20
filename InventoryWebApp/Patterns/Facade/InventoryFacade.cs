@@ -225,17 +225,30 @@ namespace InventoryWebApp.Patterns
 
             foreach (var comp in components)
             {
+                // التحقق من أن السعر صالح
                 if (comp.Price <= 0)
                     throw new Exception($"❌ سعر المكوّن {comp.ProductName} غير صالح");
 
+                // التحقق من أن الكمية موجودة وصحيحة
+                if (!componentQuantities.ContainsKey(comp.ProductID) ||
+                    componentQuantities[comp.ProductID] <= 0)
+                {
+                    throw new Exception($"❌ يجب إدخال كمية صحيحة للمكوّن: {comp.ProductName}");
+                }
+
                 int qtyPerUnit = componentQuantities[comp.ProductID];
 
-                // سعر المكوّن للوحدة
+                // حساب سعر هذا المكوّن
                 totalPrice += comp.Price * qtyPerUnit;
             }
 
+            // التحقق النهائي قبل الضرب
+            if (totalPrice <= 0)
+                throw new Exception("❌ لم يتم حساب السعر النهائي بشكل صحيح");
+
             // ضرب في عدد الوحدات المنتجة
             totalPrice *= finalQuantity;
+
 
 
             // 4) بناء المنتج المركب (Builder)
