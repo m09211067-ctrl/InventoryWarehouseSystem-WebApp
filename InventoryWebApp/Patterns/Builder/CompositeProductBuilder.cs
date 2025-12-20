@@ -27,6 +27,11 @@ namespace InventoryWebApp.Patterns.Builder
             _product.Price = price;
         }
 
+        public void SetDescription(string description)
+        {
+            _product.Description = description;
+        }
+
         public void SetQuantity(int qty)
         {
             _product.Quantity = qty;
@@ -39,6 +44,8 @@ namespace InventoryWebApp.Patterns.Builder
 
         public Product Build()
         {
+            if (_product.Price <= 0)
+                throw new Exception("❌ السعر النهائي للمنتج المركب غير صالح");
             return _product;
         }
     }

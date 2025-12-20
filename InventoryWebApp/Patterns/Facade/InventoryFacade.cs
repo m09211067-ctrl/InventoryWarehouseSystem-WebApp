@@ -244,7 +244,7 @@ namespace InventoryWebApp.Patterns
             builder.SetPrice(totalPrice);
             builder.SetQuantity(finalQuantity);
             builder.SetBarcode($"CMP_{Guid.NewGuid().ToString().Substring(0, 8)}");
-
+            builder.SetDescription("منتج مركب (BOM)");
             foreach (var comp in components)
             {
                 int qtyPerUnit = componentQuantities[comp.ProductID];
