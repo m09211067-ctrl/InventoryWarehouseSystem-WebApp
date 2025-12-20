@@ -203,21 +203,23 @@ namespace InventoryWebApp.Patterns
             // 2) التحقق من توفر الكميات في المخزن
             foreach (var comp in components)
             {
-                if (!componentQuantities.ContainsKey(comp.ProductID))
+                if (!componentQuantities.TryGetValue(comp.ProductID, out int qtyPerUnit))
                     throw new Exception($"❌ لم يتم تحديد كمية للمكوّن: {comp.ProductName}");
 
-                int requiredPerUnit = componentQuantities[comp.ProductID];
-                int totalRequired = requiredPerUnit * finalQuantity;
+                int totalRequired = qtyPerUnit * finalQuantity;
 
-                int available =
-                    _uow.WarehouseStockRepository.GetStock(comp.ProductID, warehouseId);
+                int available = _uow.WarehouseStockRepository
+                    .GetStock(comp.ProductID, warehouseId);
 
                 if (available < totalRequired)
                 {
                     throw new Exception(
-                        $"❌ الكمية غير كافية للمكوّن {comp.ProductName} (المتوفر: {available}, المطلوب: {totalRequired})");
+                        $"❌ الكمية غير كافية للمكوّن {comp.ProductName} " +
+                        $"(المتوفر: {available}, المطلوب: {totalRequired})"
+                    );
                 }
             }
+
 
 
             // 3) حساب السعر النهائي (BOM)
@@ -225,29 +227,19 @@ namespace InventoryWebApp.Patterns
 
             foreach (var comp in components)
             {
-                // التحقق من أن السعر صالح
+                if (!componentQuantities.TryGetValue(comp.ProductID, out int qtyPerUnit))
+                    throw new Exception($"❌ كمية المكوّن {comp.ProductName} غير محددة");
+
                 if (comp.Price <= 0)
                     throw new Exception($"❌ سعر المكوّن {comp.ProductName} غير صالح");
 
-                // التحقق من أن الكمية موجودة وصحيحة
-                if (!componentQuantities.ContainsKey(comp.ProductID) ||
-                    componentQuantities[comp.ProductID] <= 0)
-                {
-                    throw new Exception($"❌ يجب إدخال كمية صحيحة للمكوّن: {comp.ProductName}");
-                }
-
-                int qtyPerUnit = componentQuantities[comp.ProductID];
-
-                // حساب سعر هذا المكوّن
+                // سعر المكوّن داخل وحدة واحدة
                 totalPrice += comp.Price * qtyPerUnit;
             }
 
-            // التحقق النهائي قبل الضرب
-            if (totalPrice <= 0)
-                throw new Exception("❌ لم يتم حساب السعر النهائي بشكل صحيح");
-
             // ضرب في عدد الوحدات المنتجة
             totalPrice *= finalQuantity;
+
 
 
 
