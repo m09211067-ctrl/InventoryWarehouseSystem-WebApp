@@ -1,6 +1,6 @@
 namespace InventoryWebApp.Patterns.Adapter
 {
-    // خدمة خارجية (غير متوافقة مع مشروعك مباشرة)
+    // خدمة خارجية 
     public class ExternalCurrencyAPI
     {
         public decimal FetchUsdToLydRate()
